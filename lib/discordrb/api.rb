@@ -78,7 +78,13 @@ module Discordrb::API
   # @param type [Symbol] The type of HTTP request to use.
   # @param attributes [Array] The attributes for the request.
   def raw_request(type, attributes)
-    RestClient.send(type, *attributes)
+    if ENV["FIXIE_URL"]
+      RestClient.proxy = ENV["FIXIE_URL"]
+      RestClient.send(type, *attributes)
+    else
+      RestClient.send(type, *attributes)
+    end
+
   rescue RestClient::Forbidden => e
     # HACK: for #request, dynamically inject restclient's response into NoPermission - this allows us to ratelimit
     noprm = Discordrb::Errors::NoPermission.new
